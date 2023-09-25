@@ -8,6 +8,26 @@ Autor: Guilherme Kowalczuk
 
 Esse desafio foi proposto no contexto da mesa de Energia do banco BTG. O objetivo era, em suma, usar os dados do INPE de níveis previstos de chuvas para estimar a previsão de precipitação acumulada no dia 01/12/2021 para a região de escoamento da usina Hidrelétrica Camargos (bacia do rio Grande).
 
+### Output gerado
+
+```plaintext
+Processing file:  ETA40_p011221a111221.dat
+Processing file:  ETA40_p011221a081221.dat
+Processing file:  ETA40_p011221a091221.dat
+Processing file:  ETA40_p011221a101221.dat
+Processing file:  ETA40_p011221a021221.dat
+Processing file:  ETA40_p011221a031221.dat
+Processing file:  ETA40_p011221a061221.dat
+Processing file:  ETA40_p011221a071221.dat
+Processing file:  ETA40_p011221a051221.dat
+Processing file:  ETA40_p011221a041221.dat
+Total precipitation: 608.2
+```
+
+![Precipitação acumulada](plots/precipitacao_acumulada.png)
+
+![Precipitação por data](plots/precipitacao_por_data_prevista.png)
+
 ### Explicação da Solução
 
 Foi utilizada a biblioteca `geopandas`, que faz processamento de dados geoespaciais, principalmente envolvendo sistemas de coordenadas terrestres. O uso da biblioteca é bastante _straightforward_, bastando apenas criar os objetos de `Polygon` para formarem uma máscara e o `GeoDataFrame` com os dados do INPE para serem recortados.

@@ -89,7 +89,8 @@ def main():
         labels={'forecasted_date': 'Data prevista', 'data_value': 'Precipitação'},
         title='Precipitação por data prevista em Camargos (ref. 01/12/2021)',
     )
-    plot.show()
+    # plot.show()
+    plot.write_image('plots/precipitacao_por_data_prevista.png')
 
     plot = px.line(
         precipitation_by_date,
@@ -98,7 +99,8 @@ def main():
         labels={'forecasted_date': 'Data prevista', 'cumulative': 'Precipitação acumulada até a data'},
         title='Precipitação acumulada em Camargos (ref. 01/12/2021)',
     )
-    plot.show()
+    # plot.show()
+    plot.write_image('plots/precipitacao_acumulada.png')
 
 
 if __name__ == '__main__':
