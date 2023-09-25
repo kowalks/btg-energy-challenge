@@ -1,5 +1,9 @@
-import pandas as pd
 import re
+import os
+
+import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Polygon
 
 
 def read_data_file(file_path: str) -> pd.DataFrame:
@@ -27,13 +31,49 @@ def read_contour_file(file_path: str) -> pd.DataFrame:
 
 # pylint: disable=unused-argument
 def apply_contour(contour_df: pd.DataFrame, data_df: pd.DataFrame) -> pd.DataFrame:
-    return data_df
+    """Clip `data_dt` points with polygon defined by `contour_df`"""
+    geometry = gpd.points_from_xy(contour_df['long'], contour_df['lat'])
+    boundary = Polygon(geometry)
+
+    data_gdf = gpd.GeoDataFrame(data_df['data_value'], geometry=geometry)
+    data_gdf = gpd.clip(data_gdf, boundary)
+
+    ix = data_gdf.index
+    return data_df.loc[ix]
+
+def get_files(
+        data_pattern='ETA40_p([0-9]*)a([0-9]*).dat',
+        data_path='forecast_files'
+    ) -> tuple[str, tuple[str, str]]:
+    """Get all files in `data_path` that match `data_pattern`"""
+    for filename in os.listdir(data_path):
+        if match := re.match(data_pattern, filename):
+            print('Processing file: ', filename)
+            yield os.path.join(data_path, filename), match.groups()
 
 
 def main():
-    contour_df = read_contour_file('PSATCMG_CAMARGOS.bln')
-    data_df = read_data_file('forecast_files/ETA40_p011221a021221.dat')
-    data_df = apply_contour(contour_df=contour_df, data_df=data_df)
+    contour_name = 'PSATCMG_CAMARGOS.bln'
+    data_path = 'forecast_files'
+    data_pattern = 'ETA40_p([0-9]*)a([0-9]*).dat'
+
+    data_dfs: list[pd.DataFrame] = []
+    contour_df = read_contour_file(contour_name)
+
+    for path, groups in get_files(data_pattern, data_path):
+        forecast_date, forecasted_date = groups
+        data_df = read_data_file(path)
+        data_df = apply_contour(contour_df, data_df)
+        data_df['forecast_date'] = pd.to_datetime(forecast_date, format='%d%m%y')
+        data_df['forecasted_date'] = pd.to_datetime(forecasted_date, format='%d%m%y')
+        data_dfs.append(data_df)
+
+    data_df = pd.concat(data_dfs).reset_index(drop=True)
+
+    # Data Analytics
+    total_precipitation = data_df.groupby('forecast_date')[['data_value']].sum().reset_index()
+    precipitation_by_date = data_df.groupby(['forecast_date', 'forecasted_date'])[['data_value']].sum().reset_index()
+    precipitation_by_point = data_df.groupby(['forecast_date', 'long', 'lat'])[['data_value']].sum().reset_index()
 
 
 if __name__ == '__main__':
