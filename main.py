@@ -29,7 +29,6 @@ def read_contour_file(file_path: str) -> pd.DataFrame:
     return pd.DataFrame(float_raw_lines, columns=['long', 'lat'])
 
 
-# pylint: disable=unused-argument
 def apply_contour(contour_df: pd.DataFrame, data_df: pd.DataFrame) -> pd.DataFrame:
     """Clip `data_dt` points with polygon defined by `contour_df`"""
     geometry = gpd.points_from_xy(contour_df['long'], contour_df['lat'])
