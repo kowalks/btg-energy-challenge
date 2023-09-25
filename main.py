@@ -1,8 +1,9 @@
 import re
 import os
 
-import pandas as pd
 import geopandas as gpd
+import plotly.express as px
+import pandas as pd
 from shapely.geometry import Polygon
 
 
@@ -34,6 +35,7 @@ def apply_contour(contour_df: pd.DataFrame, data_df: pd.DataFrame) -> pd.DataFra
     geometry = gpd.points_from_xy(contour_df['long'], contour_df['lat'])
     boundary = Polygon(geometry)
 
+    geometry = gpd.points_from_xy(data_df['long'], data_df['lat'])
     data_gdf = gpd.GeoDataFrame(data_df['data_value'], geometry=geometry)
     data_gdf = gpd.clip(data_gdf, boundary)
 
@@ -72,7 +74,31 @@ def main():
     # Data Analytics
     total_precipitation = data_df.groupby('forecast_date')[['data_value']].sum().reset_index()
     precipitation_by_date = data_df.groupby(['forecast_date', 'forecasted_date'])[['data_value']].sum().reset_index()
-    precipitation_by_point = data_df.groupby(['forecast_date', 'long', 'lat'])[['data_value']].sum().reset_index()
+
+    precipitation_by_date = precipitation_by_date.sort_values('forecasted_date')
+    cumulative = precipitation_by_date.groupby('forecast_date')[['data_value']].cumsum()
+    precipitation_by_date['cumulative'] = cumulative
+
+    # Data Visualization
+    print('Total precipitation:', total_precipitation['data_value'].sum())
+
+    plot = px.line(
+        precipitation_by_date,
+        x='forecasted_date',
+        y='data_value',
+        labels={'forecasted_date': 'Data prevista', 'data_value': 'Precipitação'},
+        title='Precipitação por data prevista em Camargos (ref. 01/12/2021)',
+    )
+    plot.show()
+
+    plot = px.line(
+        precipitation_by_date,
+        x='forecasted_date',
+        y='cumulative',
+        labels={'forecasted_date': 'Data prevista', 'cumulative': 'Precipitação acumulada até a data'},
+        title='Precipitação acumulada em Camargos (ref. 01/12/2021)',
+    )
+    plot.show()
 
 
 if __name__ == '__main__':

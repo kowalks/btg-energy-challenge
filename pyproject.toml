@@ -6,6 +6,11 @@ authors = ["Guilherme Kowalczuk <guilhermekowalczuk@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+geopandas = "^0.14.0"
+plotly = "^5.17.0"
+ipykernel = "^6.25.2"
+matplotlib = "^3.8.0"
+nbformat = "^5.9.2"
 
 [tool.poetry.dev-dependencies]
 pandas = "2.0.3"
